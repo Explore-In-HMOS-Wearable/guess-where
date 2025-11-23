@@ -1,6 +1,6 @@
 import { map, mapCommon, MapComponent } from '@kit.MapKit';
 import { AsyncCallback } from '@kit.BasicServicesKit';
-import { promptAction, router } from '@kit.ArkUI';
+import { promptAction } from '@kit.ArkUI';
 import { Place } from '../types/Place';
 import { placeList } from '../viewmodel/PlaceList';
 import { Location } from '../types/Location';
@@ -36,7 +36,7 @@ struct Index {
     this.circleDiameter = display.getDefaultDisplaySync().width/2
     this.circleRadius = this.circleDiameter / 2;
 
-    const params = router.getParams() as mapCommon.MapOptions
+    const params = this.getUIContext().getRouter().getParams() as mapCommon.MapOptions
     if(params) {
       this.mapOptions = params
     }
@@ -51,7 +51,7 @@ struct Index {
           //console.info(this.TAG, `on-mapLoad`);
           this.addMapClickListener();
         }
-        this.mapEventManager.on("mapLoad", callback);
+        this.mapEventManager.on('mapLoad', callback);
       } else {
         console.error(`Failed to initialize the map. Code: ${err.code}; message: ${err.message}`);
       }
@@ -136,7 +136,7 @@ struct Index {
     if (!this.mapEventManager) return;
 
     let callback = (position: mapCommon.LatLng) => {
-      console.info("mapClick", `Latitude: ${position.latitude}, Longitude: ${position.longitude}`);
+      console.info('mapClick', `Latitude: ${position.latitude}, Longitude: ${position.longitude}`);
 
       this.selectedLocation = {
         latitude: position.latitude,
@@ -146,7 +146,7 @@ struct Index {
       this.checkAnswer(this.selectedLocation, this.currentQuestion!);
     };
 
-    this.mapEventManager.on("mapClick", callback);
+    this.mapEventManager.on('mapClick', callback);
   }
 
 
