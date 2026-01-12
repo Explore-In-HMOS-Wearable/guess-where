@@ -1,6 +1,5 @@
 import { Place } from '../types/Place';
 
-
 export const placeList: Place[] = [
   {
     id: 1,

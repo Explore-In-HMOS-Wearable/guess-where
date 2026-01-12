@@ -5,6 +5,6 @@ export interface Place {
   maxLatitude: number,
   minLongitude: number,
   maxLongitude: number,
-  image: Resource,
+  image: Resource
 }
 

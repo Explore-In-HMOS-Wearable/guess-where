@@ -6,12 +6,17 @@ import { placeList } from '../viewmodel/PlaceList';
 import { Location } from '../types/Location';
 import display from '@ohos.display';
 
-@Entry
+@Builder
+export function IndexBuilder() {
+  Index()
+}
+
 @Component
 struct Index {
 
+  @Consume pathStack: NavPathStack;
   @State totalPoint: number = 0;
-  @State isQuestion: boolean = false;
+  private isQuestion: boolean = false;
   @State questionNumber: number = 0;
   @State currentQuestion: Place | null = null;
   @State questions: Place[] = [];
@@ -30,16 +35,10 @@ struct Index {
   private circleDiameter: number = 0
   private circleRadius: number = 0
 
-
   aboutToAppear(): void {
 
     this.circleDiameter = display.getDefaultDisplaySync().width/2
     this.circleRadius = this.circleDiameter / 2;
-
-    const params = this.getUIContext().getRouter().getParams() as mapCommon.MapOptions
-    if(params) {
-      this.mapOptions = params
-    }
 
     this.setQuestions()
 
@@ -48,7 +47,6 @@ struct Index {
         this.mapController = mapController;
         this.mapEventManager = this.mapController.getEventManager();
         let callback = () => {
-          //console.info(this.TAG, `on-mapLoad`);
           this.addMapClickListener();
         }
         this.mapEventManager.on('mapLoad', callback);
@@ -57,7 +55,6 @@ struct Index {
       }
     };
   }
-
 
   private startGame () {
     this.isGameStarted = true;
@@ -100,14 +97,14 @@ struct Index {
 
     if(isCorrect) {
       this.totalPoint += 10;
-      promptAction.showToast({
+      promptAction.openToast({
         message: '✅ Correct Answer! +10 point',
-        duration: 1000,
+        duration: 1000
       });
     } else {
-      promptAction.showToast({
+      promptAction.openToast({
         message: '❌ Wrong!',
-        duration: 1000,
+        duration: 1000
       });
     }
 
@@ -133,7 +130,9 @@ struct Index {
   }
 
   private addMapClickListener(): void {
-    if (!this.mapEventManager) return;
+    if (!this.mapEventManager) {
+      return;
+    }
 
     let callback = (position: mapCommon.LatLng) => {
       console.info('mapClick', `Latitude: ${position.latitude}, Longitude: ${position.longitude}`);
@@ -149,28 +148,34 @@ struct Index {
     this.mapEventManager.on('mapClick', callback);
   }
 
-
   build() {
-    Column() {
 
-      if(!this.isGameStarted && !this.isGameFinished) {
-        this.buildStartScreen()
-      }
+    NavDestination() {
+      Column() {
 
-      else if(this.isGameFinished) {
-        this.buildResultScreen()
-      }
+        if(!this.isGameStarted && !this.isGameFinished) {
+          this.buildStartScreen()
+        }
 
-      else if(this.showFlag) {
-        this.buildQuestionScreen(this.currentQuestion!)
-      }
+        else if(this.isGameFinished) {
+          this.buildResultScreen()
+        }
 
-      else if(this.showMap) {
-        this.buildMapScreen()
+        else if(this.showFlag) {
+          this.buildQuestionScreen(this.currentQuestion!)
+        }
+
+        else if(this.showMap) {
+          this.buildMapScreen()
+        }
       }
-    }
-    .height('100%')
-    .width('100%')
+      .height('100%')
+      .width('100%')
+    }.onReady((context: NavDestinationContext) => {
+      this.pathStack = context.pathStack
+      this.mapOptions = context.pathInfo.param as mapCommon.MapOptions
+    })
+    .hideTitleBar(true)
   }
 
   @Builder
@@ -226,7 +231,6 @@ struct Index {
         .height(this.circleDiameter)
         .objectFit(ImageFit.Cover)
         .borderRadius(this.circleDiameter / 2)
-        .clip(new Circle({ width: this.circleDiameter, height: this.circleDiameter }))
     }
     .width('100%')
     .height('100%')
